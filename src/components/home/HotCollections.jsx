@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+import AliceCarousel from "react-alice-carousel";
+import "react-alice-carousel/lib/alice-carousel.css";
+
 const HotCollections = () => {
   const [collections, setCollections] = useState([]);
 
@@ -21,20 +24,8 @@ const HotCollections = () => {
     fetchData();
   }, []);
 
-  return (
-    <section id="section-collections" className="no-bottom">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="text-center">
-              <h2>Hot Collections</h2>
-              <div className="small-border bg-color-2"></div>
-            </div>
-          </div>
-
-{collections.map((item) => (
-  <div className="col-lg-3 col-md-6 col-sm-6 col-xs-12" key={item.id}>
-    <div className="nft_coll">
+  const items = collections.map((item) => (
+    <div className="nft_coll" key={item.id}>
       <div className="nft_wrap">
         <Link to={`/item-details/${item.nftId}`}>
           <img src={item.nftImage} className="lazy img-fluid" alt="" />
@@ -53,9 +44,31 @@ const HotCollections = () => {
         <span>ERC-{item.code}</span>
       </div>
     </div>
-  </div>
-))}
+  ));
 
+  return (
+    <section id="section-collections" className="no-bottom">
+      <div className="container">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="text-center">
+              <h2>Hot Collections</h2>
+              <div className="small-border bg-color-2"></div>
+            </div>
+          </div>
+
+          <AliceCarousel
+            mouseTracking
+            infinite
+            items={items}
+            disableDotsControls
+            slideBy={1}
+            responsive={{
+              0: { items: 1 },
+              568: { items: 2 },
+              1024: { items: 4 },
+            }}
+          />
         </div>
       </div>
     </section>
