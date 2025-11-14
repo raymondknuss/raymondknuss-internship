@@ -16714,3 +16714,49 @@ img {
 .no-cursor {
   cursor: not-allowed;
 }
+
+/* =============================
+   Skeleton Loading (HotCollections)
+   ============================= */
+
+.skeleton-box {
+  background: linear-gradient(90deg,
+      #eeeeee 0%,
+      #dddddd 50%,
+      #eeeeee 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  height: 20px;
+  margin-top: 10px;
+}
+
+.skeleton-text.small {
+  height: 14px;
+  width: 50%;
+}
+
+.nft_wrap.skeleton-box {
+  height: 200px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.pp-coll.skeleton-box {
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
