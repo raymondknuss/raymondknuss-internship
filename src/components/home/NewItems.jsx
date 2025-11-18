@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import Countdown from "../common/Countdown";
 import AliceCarousel from "react-alice-carousel";
 import "react-alice-carousel/lib/alice-carousel.css";
 
 const NewItems = () => {
   const [newItems, setNewItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     const fetchNewItems = async () => {
@@ -28,37 +27,7 @@ const NewItems = () => {
     fetchNewItems();
   }, []);
 
-  useEffect(() => {
-    if (!newItems.length) return;
-
-    const intervalId = setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [newItems.length]);
-
-  const getTimeLeft = (expiryDate) => {
-    if (!expiryDate) return null;
-
-    const ms = expiryDate - now;
-    if (ms <= 0) return null;
-
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    return {
-      hours,
-      minutes,
-      seconds,
-    };
-  };
-
   const items = newItems.map((item) => {
-    const timeLeft = getTimeLeft(item.expiryDate);
-
     return (
       <div className="nft__item" key={item.id}>
         <div className="author_list_pp">
@@ -68,11 +37,7 @@ const NewItems = () => {
           </Link>
         </div>
 
-        {timeLeft && (
-          <div className="de_countdown">
-            {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-          </div>
-        )}
+        <Countdown expiryDate={item.expiryDate} />
 
         <div className="nft__item_wrap">
           <Link to={`/item-details/${item.nftId}`}>
