@@ -1,78 +1,100 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Countdown from "../components/common/Countdown";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 const ItemDetails = () => {
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const nftId = searchParams.get("nftId");
+
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!nftId) return;
+
     const fetchItem = async () => {
-      setLoading(true);
+      try {
+        const { data } = await axios.get(
+          `https://us-central1-nft-cloud-functions.cloudfunctions.net/itemDetails?nftId=${nftId}`
+        );
 
-      const res = await fetch(
-        `https://us-central1-nft-cloud-functions.cloudfunctions.net/itemDetails?id=${id}`
-      );
-      const data = await res.json();
+        if (data) {
+          setItem(data);
+        }
 
-      console.log("ITEM DETAILS DATA:", data);
-
-      setItem(data);
-      setLoading(false);
+      } catch (error) {
+        console.error("Error fetching item details:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchItem();
-  }, [id]);
+  }, [nftId]);
 
   if (loading) {
     return (
-      <section>
-        <div className="container">
-          <h2>Loading item...</h2>
-        </div>
+      <section className="container py-5">
+        <h2>Loading item details...</h2>
       </section>
     );
   }
 
   if (!item) {
     return (
-      <section>
-        <div className="container">
-          <h2>Item not found.</h2>
-        </div>
+      <section className="container py-5">
+        <h2>Item not found</h2>
+        <p>The item you're looking for doesn't exist.</p>
       </section>
     );
   }
 
   return (
-    <section id="item-details">
-      <div className="container">
-        <h2>{item.title}</h2>
+    <section className="container py-5">
+      <div className="row">
 
-        {/* Countdown */}
-        <Countdown expiryDate={item.expiryDate} />
+        {/* IMAGE */}
+        <div className="col-md-6 text-center">
+          <img
+            src={item.nftImage}
+            alt={item.title}
+            className="img-fluid rounded shadow"
+          />
+        </div>
 
-        <img
-          src={item.nftImage}
-          alt={item.title}
-          style={{ maxWidth: "400px", marginTop: "20px" }}
-        />
+        {/* INFO */}
+        <div className="col-md-6">
+          <h2>{item.title}</h2>
+          <p className="text-muted">{item.description}</p>
 
-        <p>Price: {item.price} ETH</p>
-        <p>Likes: {item.likes}</p>
+          <ul className="list-unstyled">
+            <li><strong>Price:</strong> {item.price} ETH</li>
+            <li><strong>Likes:</strong> {item.likes}</li>
+            <li><strong>Views:</strong> {item.views}</li>
+            <li><strong>Category:</strong> {item.category}</li>
+            <li>
+              <strong>Tags:</strong> {item.tags?.join(", ")}
+            </li>
+            <li>
+              <strong>Auction ends:</strong>{" "}
+              {item.auctionEndsAt
+                ? new Date(item.auctionEndsAt).toLocaleString()
+                : "N/A"}
+            </li>
+          </ul>
 
-        <h3>Author</h3>
-        <p>{item.authorName}</p>
+          <div className="d-flex align-items-center mt-4">
+            <img
+              src={item.authorImage}
+              alt={item.authorName}
+              className="rounded-circle"
+              width="50"
+              height="50"
+            />
+            <span className="ms-3 fw-bold">{item.authorName}</span>
+          </div>
+        </div>
 
-        <h3>Description</h3>
-        <p>{item.description}</p>
-
-        {/* You will later add:
-            - Bids section
-            - More styling
-            - Buttons (Buy Now, Share, etc.)
-        */}
       </div>
     </section>
   );

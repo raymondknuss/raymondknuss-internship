@@ -1,159 +1,84 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
-import Countdown from "../common/Countdown";
 
 const ExploreItems = () => {
   const [items, setItems] = useState([]);
-  const [visible, setVisible] = useState(8);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
-
-  const fetchData = async (filterValue = "") => {
-    setLoading(true);
-
-    const baseUrl =
-      "https://us-central1-nft-cloud-functions.cloudfunctions.net/explore";
-
-    const url = filterValue
-      ? `${baseUrl}?filter=${filterValue}`
-      : baseUrl;
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    console.log("EXPLORE DATA:", data);
-    setItems(data);
-    setVisible(8);
-    setLoading(false);
-  };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get(
+          "https://us-central1-nft-cloud-functions.cloudfunctions.net/explore"
+        );
+        setItems(data);
+      } catch (error) {
+        console.error("Error fetching Explore items:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  const handleFilter = (e) => {
-    const value = e.target.value;
-    setFilter(value);
-    fetchData(value);
-  };
-
-  const loadMore = () => {
-    setVisible((prev) => prev + 4);
-  };
-
-  const skeletons = new Array(8).fill(0).map((_, i) => (
-    <div
-      key={i}
-      className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
-      style={{ display: "block" }}
-    >
-      <div className="nft__item skeleton-loading">
-        <div className="skeleton-img"></div>
-        <div className="skeleton-text"></div>
-        <div className="skeleton-text short"></div>
-      </div>
-    </div>
-  ));
-
   return (
-    <section id="section-explore">
-      <div className="container">
-        <div className="row">
+    <section className="container py-5">
+      <h2 className="text-center mb-4">Explore Items</h2>
 
-          {/* Filter Dropdown */}
-          <div className="col-md-12 mb-4">
-            <select
-              id="filter-items"
-              value={filter}
-              onChange={handleFilter}
-            >
-              <option value="">Default</option>
-              <option value="price_low_to_high">Price, Low to High</option>
-              <option value="price_high_to_low">Price, High to Low</option>
-              <option value="likes_high_to_low">Most liked</option>
-            </select>
-          </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="row g-4">
+          {items.map((item) => (
+            <div key={item.id} className="col-lg-3 col-md-4 col-sm-6">
 
-          {/* Items */}
-{/* Items */}
-<div className="col-md-12">
-  <div className="row">
-    {loading
-      ? skeletons
-      : items.slice(0, visible).map((item) => (
-          <div
-            key={item.id}
-            className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
-            style={{ display: "block" }}
-          >
-            <div className="nft__item">
+              <div className="nft__item">
 
-              {/* Author */}
-              <div className="author_list_pp">
-                <Link to={`/author/${item.authorId}`}>
-                  <img className="lazy" src={item.authorImage} alt="" />
-                  <i className="fa fa-check"></i>
-                </Link>
-              </div>
+                <div className="nft__item_wrap">
+                  {/* Corrected property → nftId */}
+                  <Link to={`/item-details?nftId=${item.nftId}`}>
+                    <img
+                      src={item.nftImage}
+                      alt={item.title}
+                      className="lazy nft__item_preview"
+                    />
+                  </Link>
+                </div>
 
-              {/* Countdown */}
-              <Countdown expiryDate={item.expiryDate} />
+                <div className="nft__item_info">
+                  {/* Corrected property → nftId */}
+                  <Link to={`/item-details?nftId=${item.nftId}`}>
+                    <h4>{item.title}</h4>
+                  </Link>
 
-              {/* Item Image */}
-              <div className="nft__item_wrap">
-                <div className="nft__item_extra">
-                  <div className="nft__item_buttons">
-                    <button>Buy Now</button>
-                    <div className="nft__item_share">
-                      <h4>Share</h4>
-                      <a href="#"><i className="fa fa-facebook fa-lg"></i></a>
-                      <a href="#"><i className="fa fa-twitter fa-lg"></i></a>
-                      <a href="#"><i className="fa fa-envelope fa-lg"></i></a>
-                    </div>
+                  <div className="nft__item_price">
+                    {item.price} ETH
+                  </div>
+
+                  <div className="nft__item_like">
+                    <i className="fa fa-heart"></i>
+                    <span>{item.likes}</span>
                   </div>
                 </div>
 
-                <Link to={`/item-details/${item.id}`}>
-                  <img
-                    src={item.nftImage}
-                    className="lazy nft__item_preview"
-                    alt=""
-                  />
-                </Link>
-              </div>
-
-              {/* Info */}
-              <div className="nft__item_info">
-                <Link to={`/item-details/${item.id}`}>
-                  <h4>{item.title}</h4>
-                </Link>
-
-                <div className="nft__item_price">{item.price} ETH</div>
-
-                <div className="nft__item_like">
-                  <i className="fa fa-heart"></i>
-                  <span>{item.likes}</span>
+                <div className="nft__item_author">
+                  <Link to={`/author/${item.authorId}`}>
+                    <img
+                      className="author_thumb"
+                      src={item.authorImage}
+                      alt="author"
+                    />
+                  </Link>
                 </div>
+
               </div>
 
             </div>
-          </div>
-        ))}
-  </div>
-</div>
-
-
-          {/* Load More Button */}
-          {visible < items.length && (
-            <div className="col-md-12 text-center mt-4">
-              <button className="btn-main lead" onClick={loadMore}>
-                Load more
-              </button>
-            </div>
-          )}
-
+          ))}
         </div>
-      </div>
+      )}
     </section>
   );
 };

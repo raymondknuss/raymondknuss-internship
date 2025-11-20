@@ -8,8 +8,6 @@ const Author = () => {
   const [loading, setLoading] = useState(true);
   const [followed, setFollowed] = useState(false);
 
-  console.log("AUTHOR ID FROM URL:", id);
-
   useEffect(() => {
     const fetchAuthor = async () => {
       setLoading(true);
@@ -18,14 +16,24 @@ const Author = () => {
         const res = await fetch(
           `https://us-central1-nft-cloud-functions.cloudfunctions.net/authors?author=${id}`
         );
+
+        if (!res.ok) {
+          throw new Error("FS Author API unreachable");
+        }
+
         const data = await res.json();
 
-        console.log("AUTHOR API RESULT:", data);
+        if (!data || Object.keys(data).length === 0) {
+          throw new Error("FS Author API returned empty data");
+        }
 
         setAuthor(data);
-      } catch (err) {
-        console.error("Error fetching author:", err);
-        setAuthor(null);
+
+      } catch (error) {
+        console.warn("Falling back to local authors.json:", error);
+
+        const fallback = await import("../data/authors.json");
+        setAuthor(fallback.default);
       }
 
       setLoading(false);
@@ -48,7 +56,7 @@ const Author = () => {
     );
   }
 
-  if (!author) {
+  if (!author || !author.nftCollection) {
     return (
       <section>
         <div className="container">
@@ -84,7 +92,6 @@ const Author = () => {
             <h2>{author.authorName}</h2>
             <p>@{author.tag}</p>
 
-            {/* ✅ API uses "address" for the wallet */}
             <p>Wallet: {author.address}</p>
 
             <h4>Followers: {author.followers}</h4>
@@ -100,56 +107,57 @@ const Author = () => {
 
         {/* NFT COLLECTION */}
         <div className="row">
-          {author.nftCollection && author.nftCollection.length > 0 ? (
-            author.nftCollection.map((nft) => (
-              <div
-                key={nft.id}
-                className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
-                style={{ display: "block" }}
-              >
-                <div className="nft__item">
+          {author.nftCollection.map((nft) => (
+            <div
+              key={nft.id}
+              className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
+              style={{ display: "block" }}
+            >
+              <div className="nft__item">
 
-                  {/* Author Bubble */}
-                  <div className="author_list_pp">
-                    <Link to={`/author/${id}`}>
-                      <img className="lazy" src={nft.authorImage} alt="" />
-                      <i className="fa fa-check"></i>
-                    </Link>
-                  </div>
+                {/* Author Bubble */}
+                <div className="author_list_pp">
+                  <Link to={`/author/${id}`}>
+                    <img className="" src={nft.authorImage} alt="" />
+                    <i className="fa fa-check"></i>
+                  </Link>
+                </div>
 
-                  {/* Countdown */}
-                  <Countdown expiryDate={nft.expiryDate} />
+                {/* Countdown */}
+                <Countdown expiryDate={nft.expiryDate} />
 
-                  {/* NFT Image */}
-                  <div className="nft__item_wrap">
-                    <Link to={`/item-details/${nft.id}`}>
-                      <img
-                        src={nft.nftImage}
-                        className="lazy nft__item_preview"
-                        alt=""
-                      />
-                    </Link>
-                  </div>
+                {/* NFT Image */}
+                <div className="nft__item_wrap">
+                  <Link
+                    to={`/item-details?nftid=${nft?.nftid ?? nft?.nftId ?? ""}`}
+                  >
+                    <img
+                      src={nft.nftImage}
+                      className=" nft__item_preview"
+                      alt=""
+                    />
+                  </Link>
+                </div>
 
-                  {/* Info */}
-                  <div className="nft__item_info">
-                    <Link to={`/item-details/${nft.id}`}>
-                      <h4>{nft.title}</h4>
-                    </Link>
+                {/* Info */}
+                <div className="nft__item_info">
+                  <Link
+                    to={`/item-details?nftid=${nft?.nftid ?? nft?.nftId ?? ""}`}
+                  >
+                    <h4>{nft.title}</h4>
+                  </Link>
 
-                    <div className="nft__item_price">{nft.price} ETH</div>
+                  <div className="nft__item_price">{nft.price} ETH</div>
 
-                    <div className="nft__item_like">
-                      <i className="fa fa-heart"></i>
-                      <span>{nft.likes}</span>
-                    </div>
+                  <div className="nft__item_like">
+                    <i className="fa fa-heart"></i>
+                    <span>{nft.likes}</span>
                   </div>
                 </div>
+
               </div>
-            ))
-          ) : (
-            <p>No NFTs found.</p>
-          )}
+            </div>
+          ))}
         </div>
 
       </div>

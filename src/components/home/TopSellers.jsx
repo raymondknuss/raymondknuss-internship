@@ -27,7 +27,7 @@ const TopSellers = () => {
   const skeletons = new Array(12).fill(0).map((_, index) => (
     <li key={index}>
       <div className="author_list_pp">
-        <div className="lazy skeleton-box pp-author"></div>
+        <div className=" skeleton-box pp-author"></div>
       </div>
       <div className="author_list_info">
         <div className="skeleton-box skeleton-text" style={{ width: "80px" }} />
@@ -58,7 +58,7 @@ const TopSellers = () => {
                       <div className="author_list_pp">
                         <Link to={`/author/${seller.authorId}`}>
                           <img
-                            className="lazy pp-author"
+                            className=" pp-author"
                             src={seller.authorImage}
                             alt={seller.authorName}
                           />

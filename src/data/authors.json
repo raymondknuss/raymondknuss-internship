@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "authorName": "Sample Author",
+  "authorImage": "https://placehold.co/200",
+  "tag": "sample_tag",
+  "address": "0x123...ABC",
+  "followers": 3400,
+  "nftCollection": [
+    {
+      "id": 101,
+      "nftid": 17914494,
+      "nftImage": "https://placehold.co/300",
+      "authorImage": "https://placehold.co/80",
+      "expiryDate": 1736515582000,
+      "title": "Sample NFT",
+      "price": 3.1,
+      "likes": 107
+    }
+  ]
+}
