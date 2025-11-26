@@ -9,12 +9,14 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
+import authors from "../../data/authors.json";
+
 const NewItems = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadNewItems = async () => {
       try {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/newItems"
@@ -22,23 +24,22 @@ const NewItems = () => {
 
         const normalized = data.map((item) => ({
           ...item,
+
           nftId: item.nftId ?? item.id,
-          authorImage: item.authorImage,
-          nftImage: item.nftImage,
+          ownerId: item.ownerId ?? item.authorId ?? null,
+          creatorId: item.creatorId ?? null,
           expiryDate: item.expiryDate ?? null,
-          price: item.price ?? item.currentPrice ?? 0,
-          likes: item.likes ?? 0
         }));
 
         setItems(normalized);
-      } catch (error) {
-        console.error("Error fetching new items:", error);
+      } catch (err) {
+        console.error("Error loading new items:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    loadNewItems();
   }, []);
 
   return (
@@ -46,11 +47,10 @@ const NewItems = () => {
       <div className="container">
         <div className="row">
 
-          <div className="col-lg-12">
-            <div className="text-center">
-              <h2>New Items</h2>
-              <div className="small-border bg-color-2"></div>
-            </div>
+          {/* HEADER */}
+          <div className="col-lg-12 text-center mb-3">
+            <h2>New Items</h2>
+            <div className="small-border bg-color-2"></div>
           </div>
 
           {loading ? (
@@ -67,55 +67,104 @@ const NewItems = () => {
                 breakpoints={{
                   0: { slidesPerView: 1 },
                   568: { slidesPerView: 2 },
-                  1024: { slidesPerView: 4 }
+                  1024: { slidesPerView: 4 },
                 }}
               >
-                {items.map((item) => (
-                  <SwiperSlide key={item.nftId}>
-                    <div className="nft__item">
+                {items.map((item) => {
 
-                      {item.expiryDate && (
-                        <Countdown expiryDate={item.expiryDate} />
-                      )}
+                  const owner = authors.find(
+                    (auth) => auth.authorId === item.ownerId
+                  );
 
-                      <div className="nft__item_wrap">
-                        <Link to={`/item-details?nftId=${item.nftId}`}>
+                  return (
+                    <SwiperSlide key={item.nftId}>
+                      <div
+                        className="rounded bg-white shadow-sm p-3 position-relative"
+                        style={{ cursor: "pointer" }}
+                      >
+
+                        {/* AUTHOR BADGE */}
+                        {owner && (
+                          <Link
+                            to={`/author/${owner.authorId}`}
+                            className="position-absolute"
+                            style={{
+                              top: "10px",
+                              left: "10px",
+                              zIndex: 2,
+                            }}
+                          >
+                            <img
+                              src={owner.authorImage}
+                              alt={owner.authorName}
+                              width="45"
+                              height="45"
+                              className="rounded-circle shadow"
+                              style={{ border: "2px solid white" }}
+                            />
+                          </Link>
+                        )}
+
+                        {/* COUNTDOWN */}
+                        {item.expiryDate && (
+                          <div
+                            className="position-absolute bg-white px-2 py-1 rounded-pill shadow-sm"
+                            style={{
+                              top: "10px",
+                              right: "10px",
+                              fontSize: "0.85rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            <Countdown expiryDate={item.expiryDate} />
+                          </div>
+                        )}
+
+                        {/* IMAGE */}
+                        <Link to={`/item-details/${item.nftId}`}>
                           <img
                             src={item.nftImage}
-                            className="lazy nft__item_preview"
                             alt={item.title}
+                            className="img-fluid rounded mb-3"
+                            style={{
+                              width: "100%",
+                              height: "auto",
+                            }}
                           />
                         </Link>
-                      </div>
 
-                      <div className="nft__item_info">
-                        <Link to={`/item-details?nftId=${item.nftId}`}>
-                          <h4>{item.title}</h4>
+                        {/* TITLE */}
+                        <Link
+                          to={`/item-details/${item.nftId}`}
+                          className="text-decoration-none"
+                        >
+                          <h5 className="fw-bold mb-2" style={{ color: "#000" }}>
+                            {item.title}
+                          </h5>
                         </Link>
 
-                        <div className="nft__item_price">
-                          {item.price} ETH
+                        {/* PRICE + LIKES */}
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div
+                            className="fw-bold"
+                            style={{ fontSize: "0.95rem", color: "#000" }}
+                          >
+                            {item.price} ETH
+                          </div>
+
+                          <div
+                            className="text-muted d-flex align-items-center"
+                            style={{ fontSize: "0.9rem", gap: "6px" }}
+                          >
+                            <i className="fa fa-heart"></i>
+                            <span>{item.likes}</span>
+                          </div>
                         </div>
 
-                        <div className="nft__item_like">
-                          <i className="fa fa-heart"></i>
-                          <span>{item.likes}</span>
-                        </div>
                       </div>
-
-                      <div className="nft__item_author">
-                        <Link to={`/author/${item.authorId}`}>
-                          <img
-                            className="author_thumb"
-                            src={item.authorImage}
-                            alt="author"
-                          />
-                        </Link>
-                      </div>
-
-                    </div>
-                  </SwiperSlide>
-                ))}
+                    </SwiperSlide>
+                  );
+                })}
               </Swiper>
 
             </div>

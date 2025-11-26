@@ -12,11 +12,19 @@ const TopSellers = () => {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/topSellers"
         );
-        console.log("TOP SELLERS DATA:", data);
-        setSellers(data);
-        setLoading(false);
+
+        const normalized = data.map((seller) => ({
+          ...seller,
+          authorId: seller.authorId ?? seller.id ?? null,
+          authorName: seller.authorName ?? "Unknown Author",
+          authorImage: seller.authorImage ?? "/img/placeholder.png",
+          price: seller.price ?? seller.totalSales ?? 0
+        }));
+
+        setSellers(normalized);
       } catch (error) {
         console.error("Error fetching Top Sellers:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -27,7 +35,7 @@ const TopSellers = () => {
   const skeletons = new Array(12).fill(0).map((_, index) => (
     <li key={index}>
       <div className="author_list_pp">
-        <div className=" skeleton-box pp-author"></div>
+        <div className="skeleton-box pp-author"></div>
       </div>
       <div className="author_list_info">
         <div className="skeleton-box skeleton-text" style={{ width: "80px" }} />
@@ -40,7 +48,7 @@ const TopSellers = () => {
     <section id="section-popular" className="pb-5">
       <div className="container">
         <div className="row">
-          {/* Section header */}
+
           <div className="col-lg-12">
             <div className="text-center">
               <h2>Top Sellers</h2>
@@ -48,17 +56,16 @@ const TopSellers = () => {
             </div>
           </div>
 
-          {/* List */}
           <div className="col-md-12">
             <ol className="author_list">
               {loading
                 ? skeletons
                 : sellers.map((seller) => (
-                    <li key={seller.id}>
+                    <li key={seller.authorId}>
                       <div className="author_list_pp">
                         <Link to={`/author/${seller.authorId}`}>
                           <img
-                            className=" pp-author"
+                            className="pp-author"
                             src={seller.authorImage}
                             alt={seller.authorName}
                           />
@@ -76,6 +83,7 @@ const TopSellers = () => {
                   ))}
             </ol>
           </div>
+
         </div>
       </div>
     </section>

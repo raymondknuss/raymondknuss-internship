@@ -9,13 +9,17 @@ const Explore = () => {
 
   return (
     <div id="wrapper">
-      <div className="no-bottom no-top" id="content">
+      <div id="content" className="no-bottom no-top">
         <div id="top"></div>
 
+        {/* SUBHEADER */}
         <section
           id="subheader"
           className="text-light"
-          style={{ background: `url("${SubHeader}") top` }}
+          style={{
+            background: `url("${SubHeader}") top`,
+            backgroundSize: "cover",
+          }}
         >
           <div className="center-y relative text-center">
             <div className="container">
@@ -23,12 +27,12 @@ const Explore = () => {
                 <div className="col-md-12 text-center">
                   <h1>Explore</h1>
                 </div>
-                <div className="clearfix"></div>
               </div>
             </div>
           </div>
         </section>
 
+        {/* EXPLORE ITEMS */}
         <section aria-label="section">
           <ExploreItems />
         </section>
