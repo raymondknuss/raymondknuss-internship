@@ -9,15 +9,15 @@ const Countdown = ({ expiryDate }) => {
   useEffect(() => {
     if (!expiryDate) return;
 
-    const interval = setInterval(() => {
+    const intervalId = setInterval(() => {
       const remaining = expiryDate - Date.now();
       setTimeLeft(remaining > 0 ? remaining : 0);
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalId);
   }, [expiryDate]);
 
-  if (!timeLeft) return null;
+  if (!expiryDate || timeLeft <= 0) return null;
 
   const totalSeconds = Math.floor(timeLeft / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -25,9 +25,9 @@ const Countdown = ({ expiryDate }) => {
   const seconds = totalSeconds % 60;
 
   return (
-    <div className="de_countdown">
+    <>
       {hours}h {minutes}m {seconds}s
-    </div>
+    </>
   );
 };
 
