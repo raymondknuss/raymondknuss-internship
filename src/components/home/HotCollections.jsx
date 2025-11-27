@@ -15,11 +15,10 @@ const HotCollections = () => {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/hotCollections"
         );
-        console.log("HOT COLLECTION DATA:", data);
         setCollections(data);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching HotCollections:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -34,16 +33,16 @@ const HotCollections = () => {
           <img src={item.nftImage} className="lazy img-fluid" alt="" />
         </Link>
       </div>
+
       <div className="nft_coll_pp">
         <Link to={`/author/${item.authorId}`}>
           <img className="lazy pp-coll" src={item.authorImage} alt="" />
         </Link>
         <i className="fa fa-check"></i>
       </div>
+
       <div className="nft_coll_info">
-        <Link to="/explore">
-          <h4>{item.title}</h4>
-        </Link>
+        <h4>{item.title}</h4>
         <span>ERC-{item.code}</span>
       </div>
     </div>
@@ -65,50 +64,99 @@ const HotCollections = () => {
     </div>
   ));
 
-return (
-  <section id="section-collections" className="no-bottom">
-    <div className="container">
-      <div className="row">
-        <div className="col-lg-12">
-          <div className="text-center">
-            <h2>Hot Collections</h2>
-            <div className="small-border bg-color-2"></div>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="col-12">
-            <div className="row">
-              {skeletons.map((skel, index) => (
-                <div
-                  key={index}
-                  className="col-lg-3 col-md-6 col-sm-6 col-xs-12"
-                >
-                  {skel}
-                </div>
-              ))}
+  return (
+    <section id="section-collections" className="no-bottom">
+      <div className="container">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="text-center">
+              <h2>Hot Collections</h2>
+              <div className="small-border bg-color-2"></div>
             </div>
           </div>
-        ) : (
-          <div className="col-12">
-            <AliceCarousel
-              mouseTracking
-              infinite
-              items={items}
-              disableDotsControls
-              slideBy={1}
-              responsive={{
-                0: { items: 1 },
-                568: { items: 2 },
-                1024: { items: 4 },
-              }}
-            />
-          </div>
-        )}
+
+          {loading ? (
+            <div className="col-12">
+              <div className="row">
+                {skeletons.map((skel, index) => (
+                  <div
+                    key={index}
+                    className="col-lg-3 col-md-6 col-sm-6 col-xs-12"
+                  >
+                    {skel}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="col-12 p-0" style={{ position: "relative" }}>
+              <AliceCarousel
+                mouseTracking
+                infinite
+                disableDotsControls
+                disableSlideInfo
+                slideBy={1}
+                responsive={{
+                  0: { items: 1 },
+                  568: { items: 2 },
+                  1024: { items: 4 },
+                }}
+                renderPrevButton={() => (
+                  <button
+                    style={{
+                      position: "absolute",
+                      left: "-25px",
+                      top: "40%",
+                      transform: "translateY(-50%)",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "#fff",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+                      cursor: "pointer",
+                      fontSize: "22px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ‹
+                  </button>
+                )}
+                renderNextButton={() => (
+                  <button
+                    style={{
+                      position: "absolute",
+                      right: "-25px",
+                      top: "40%",
+                      transform: "translateY(-50%)",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "#fff",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+                      cursor: "pointer",
+                      fontSize: "22px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ›
+                  </button>
+                )}
+                items={items}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
 };
 
 export default HotCollections;
