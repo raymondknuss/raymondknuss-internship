@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
 import Countdown from "../common/Countdown";
 import AliceCarousel from "react-alice-carousel";
 import "react-alice-carousel/lib/alice-carousel.css";
@@ -37,7 +36,7 @@ const NewItems = () => {
         overflow: "hidden",
       }}
     >
-      {/* Author Avatar */}
+      {/* AUTHOR IMAGE */}
       <div
         className="author_list_pp"
         style={{
@@ -63,7 +62,7 @@ const NewItems = () => {
         </Link>
       </div>
 
-      {/* NFT Image + Countdown Bubble */}
+      {/* NFT IMAGE */}
       <div
         className="nft__item_wrap"
         style={{
@@ -85,7 +84,7 @@ const NewItems = () => {
           />
         </Link>
 
-        {/* Countdown Orient */}
+        {/* COUNTDOWN BUBBLE */}
         {item.expiryDate && (
           <div
             style={{
@@ -107,7 +106,7 @@ const NewItems = () => {
         )}
       </div>
 
-      {/* Title + Price + Likes */}
+      {/* TITLE, PRICE, LIKES */}
       <div className="nft__item_info" style={{ padding: "10px 5px 20px" }}>
         <Link to={`/item-details/${item.nftId}`}>
           <h4
@@ -163,7 +162,7 @@ const NewItems = () => {
     <section id="section-items" className="no-bottom">
       <div className="container">
         <div className="row">
-          {/* Section Title */}
+          {/* SECTION TITLE */}
           <div className="col-lg-12">
             <div className="text-center">
               <h2>New Items</h2>
@@ -171,7 +170,6 @@ const NewItems = () => {
             </div>
           </div>
 
-          {/* Content */}
           <div className="col-12 p-0" style={{ position: "relative" }}>
             {loading ? (
               <div className="row">

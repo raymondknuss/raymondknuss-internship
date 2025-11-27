@@ -1,93 +1,80 @@
-import React, { useEffect } from "react";
-import EthImage from "../images/ethereum.svg";
-import { Link } from "react-router-dom";
-import AuthorImage from "../images/author_thumbnail.jpg";
-import nftImage from "../images/nftImage.jpg";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import Countdown from "../components/common/Countdown";
 
 const ItemDetails = () => {
+  const { id } = useParams();
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    const fetchItem = async () => {
+      setLoading(true);
+
+      const res = await fetch(
+        `https://us-central1-nft-cloud-functions.cloudfunctions.net/itemDetails?id=${id}`
+      );
+      const data = await res.json();
+
+      console.log("ITEM DETAILS DATA:", data);
+
+      setItem(data);
+      setLoading(false);
+    };
+
+    fetchItem();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <section>
+        <div className="container">
+          <h2>Loading item...</h2>
+        </div>
+      </section>
+    );
+  }
+
+  if (!item) {
+    return (
+      <section>
+        <div className="container">
+          <h2>Item not found.</h2>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <div id="wrapper">
-      <div className="no-bottom no-top" id="content">
-        <div id="top"></div>
-        <section aria-label="section" className="mt90 sm-mt-0">
-          <div className="container">
-            <div className="row">
-              <div className="col-md-6 text-center">
-                <img
-                  src={nftImage}
-                  className="img-fluid img-rounded mb-sm-30 nft-image"
-                  alt=""
-                />
-              </div>
-              <div className="col-md-6">
-                <div className="item_info">
-                  <h2>Rainbow Style #194</h2>
+    <section id="item-details">
+      <div className="container">
+        <h2>{item.title}</h2>
 
-                  <div className="item_info_counts">
-                    <div className="item_info_views">
-                      <i className="fa fa-eye"></i>
-                      100
-                    </div>
-                    <div className="item_info_like">
-                      <i className="fa fa-heart"></i>
-                      74
-                    </div>
-                  </div>
-                  <p>
-                    doloremque laudantium, totam rem aperiam, eaque ipsa quae ab
-                    illo inventore veritatis et quasi architecto beatae vitae
-                    dicta sunt explicabo.
-                  </p>
-                  <div className="d-flex flex-row">
-                    <div className="mr40">
-                      <h6>Owner</h6>
-                      <div className="item_author">
-                        <div className="author_list_pp">
-                          <Link to="/author">
-                            <img className="lazy" src={AuthorImage} alt="" />
-                            <i className="fa fa-check"></i>
-                          </Link>
-                        </div>
-                        <div className="author_list_info">
-                          <Link to="/author">Monica Lucas</Link>
-                        </div>
-                      </div>
-                    </div>
-                    <div></div>
-                  </div>
-                  <div className="de_tab tab_simple">
-                    <div className="de_tab_content">
-                      <h6>Creator</h6>
-                      <div className="item_author">
-                        <div className="author_list_pp">
-                          <Link to="/author">
-                            <img className="lazy" src={AuthorImage} alt="" />
-                            <i className="fa fa-check"></i>
-                          </Link>
-                        </div>
-                        <div className="author_list_info">
-                          <Link to="/author">Monica Lucas</Link>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="spacer-40"></div>
-                    <h6>Price</h6>
-                    <div className="nft-item-price">
-                      <img src={EthImage} alt="" />
-                      <span>1.85</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Countdown */}
+        <Countdown expiryDate={item.expiryDate} />
+
+        <img
+          src={item.nftImage}
+          alt={item.title}
+          style={{ maxWidth: "400px", marginTop: "20px" }}
+        />
+
+        <p>Price: {item.price} ETH</p>
+        <p>Likes: {item.likes}</p>
+
+        <h3>Author</h3>
+        <p>{item.authorName}</p>
+
+        <h3>Description</h3>
+        <p>{item.description}</p>
+
+        {/* You will later add:
+            - Bids section
+            - More styling
+            - Buttons (Buy Now, Share, etc.)
+        */}
       </div>
-    </div>
+    </section>
   );
 };
 
