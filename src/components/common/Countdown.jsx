@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from "react";
 
 const Countdown = ({ expiryDate }) => {
-  const [now, setNow] = useState(Date.now());
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const initial = expiryDate - Date.now();
+    return initial > 0 ? initial : 0;
+  });
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNow(Date.now());
+    if (!expiryDate) return;
+
+    const interval = setInterval(() => {
+      const remaining = expiryDate - Date.now();
+      setTimeLeft(remaining > 0 ? remaining : 0);
     }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, []);
+    return () => clearInterval(interval);
+  }, [expiryDate]);
 
-  if (!expiryDate) return null;
+  if (!timeLeft) return null;
 
-  const ms = expiryDate - now;
-  if (ms <= 0) return null;
-
-  const totalSeconds = Math.floor(ms / 1000);
+  const totalSeconds = Math.floor(timeLeft / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
