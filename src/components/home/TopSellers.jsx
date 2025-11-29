@@ -7,12 +7,12 @@ const TopSellers = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSellers = async () => {
+    const fetchTopSellers = async () => {
       try {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/topSellers"
         );
-        console.log("TOP SELLERS DATA:", data);
+
         setSellers(data);
         setLoading(false);
       } catch (error) {
@@ -21,9 +21,10 @@ const TopSellers = () => {
       }
     };
 
-    fetchSellers();
+    fetchTopSellers();
   }, []);
 
+  // Skeleton placeholders (12 total)
   const skeletons = new Array(12).fill(0).map((_, index) => (
     <li key={index}>
       <div className="author_list_pp">
@@ -31,7 +32,10 @@ const TopSellers = () => {
       </div>
       <div className="author_list_info">
         <div className="skeleton-box skeleton-text" style={{ width: "80px" }} />
-        <div className="skeleton-box skeleton-text small" style={{ width: "50px" }} />
+        <div
+          className="skeleton-box skeleton-text small"
+          style={{ width: "50px" }}
+        />
       </div>
     </li>
   ));
@@ -40,7 +44,8 @@ const TopSellers = () => {
     <section id="section-popular" className="pb-5">
       <div className="container">
         <div className="row">
-          {/* Section header */}
+
+          {/* Header */}
           <div className="col-lg-12">
             <div className="text-center">
               <h2>Top Sellers</h2>
@@ -53,7 +58,7 @@ const TopSellers = () => {
             <ol className="author_list">
               {loading
                 ? skeletons
-                : sellers.map((seller) => (
+                : sellers.map((seller, index) => (
                     <li key={seller.id}>
                       <div className="author_list_pp">
                         <Link to={`/author/${seller.authorId}`}>
@@ -76,6 +81,7 @@ const TopSellers = () => {
                   ))}
             </ol>
           </div>
+
         </div>
       </div>
     </section>
