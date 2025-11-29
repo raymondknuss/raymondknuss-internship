@@ -13,18 +13,18 @@ const Countdown = ({ expiryDate }) => {
 
   if (!expiryDate) return null;
 
-  const ms = expiryDate - now;
-  if (ms <= 0) return null;
+  const diff = expiryDate - now;
+  if (diff <= 0) return null;
 
-  const totalSeconds = Math.floor(ms / 1000);
+  const totalSeconds = Math.floor(diff / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
   return (
-    <div className="de_countdown">
+    <>
       {hours}h {minutes}m {seconds}s
-    </div>
+    </>
   );
 };
 

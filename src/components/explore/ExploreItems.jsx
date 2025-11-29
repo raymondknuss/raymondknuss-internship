@@ -1,3 +1,5 @@
+// src/components/explore/ExploreItems.jsx
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Countdown from "../common/Countdown";
@@ -8,29 +10,37 @@ const ExploreItems = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
 
+  // -----------------------------
+  // Fetch data (with optional filter)
+  // -----------------------------
   const fetchData = async (filterValue = "") => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const baseUrl =
-      "https://us-central1-nft-cloud-functions.cloudfunctions.net/explore";
+      const baseUrl =
+        "https://us-central1-nft-cloud-functions.cloudfunctions.net/explore";
 
-    const url = filterValue
-      ? `${baseUrl}?filter=${filterValue}`
-      : baseUrl;
+      const url = filterValue ? `${baseUrl}?filter=${filterValue}` : baseUrl;
 
-    const res = await fetch(url);
-    const data = await res.json();
+      const res = await fetch(url);
+      const data = await res.json();
 
-    console.log("EXPLORE DATA:", data);
-    setItems(data);
-    setVisible(8);
-    setLoading(false);
+      setItems(data);
+      setVisible(8); // reset to first 8 whenever filter changes
+    } catch (err) {
+      console.error("Error fetching Explore items:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handleFilter = (e) => {
     const value = e.target.value;
     setFilter(value);
@@ -41,25 +51,159 @@ const ExploreItems = () => {
     setVisible((prev) => prev + 4);
   };
 
-  const skeletons = new Array(8).fill(0).map((_, i) => (
+  // -----------------------------
+  // Skeletons (same visual style as NewItems)
+  // -----------------------------
+  const skeletons = new Array(8).fill(0).map((_, index) => (
     <div
-      key={i}
-      className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
-      style={{ display: "block" }}
+      className="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4"
+      key={index}
     >
-      <div className="nft__item skeleton-loading">
-        <div className="skeleton-img"></div>
-        <div className="skeleton-text"></div>
-        <div className="skeleton-text short"></div>
+      <div className="nft__item">
+        <div className="author_list_pp">
+          <div className="lazy skeleton-box pp-coll" />
+        </div>
+
+        <div className="nft__item_wrap">
+          <div className="skeleton-box nft__item_preview" />
+        </div>
+
+        <div className="nft__item_info">
+          <h4 className="skeleton-box skeleton-text"></h4>
+          <div className="nft__item_price skeleton-box skeleton-text small"></div>
+          <div className="nft__item_like skeleton-box skeleton-text small"></div>
+        </div>
       </div>
     </div>
   ));
 
+  // -----------------------------
+  // Card renderer (MATCHES NewItems card layout)
+  // -----------------------------
+  const renderCard = (item) => (
+    <div
+      className="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4"
+      key={item.id}
+    >
+      <div
+        className="nft__item"
+        style={{
+          position: "relative",
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
+        {/* Author Avatar */}
+        <div
+          className="author_list_pp"
+          style={{
+            position: "absolute",
+            top: "10px",
+            left: "10px",
+            zIndex: 5,
+          }}
+        >
+          <Link to={`/author/${item.authorId}`}>
+            <img
+              className="lazy"
+              src={item.authorImage}
+              alt=""
+              style={{
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                border: "3px solid #fff",
+              }}
+            />
+            <i className="fa fa-check"></i>
+          </Link>
+        </div>
+
+        {/* NFT Image + Countdown Bubble (EXACT same bubble as NewItems) */}
+        <div
+          className="nft__item_wrap"
+          style={{
+            position: "relative",
+            padding: "0",
+            marginBottom: "15px",
+          }}
+        >
+          <Link to={`/item-details/${item.nftId}`}>
+            <img
+              src={item.nftImage}
+              className="lazy nft__item_preview"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                borderRadius: "12px 12px 0 0",
+              }}
+            />
+          </Link>
+
+          {item.expiryDate && (
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                background: "#ffffff",
+                border: "2px solid #8358ff",
+                borderRadius: "50px",
+                padding: "4px 14px",
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "#000",
+                zIndex: 10,
+              }}
+            >
+              <Countdown expiryDate={item.expiryDate} />
+            </div>
+          )}
+        </div>
+
+        {/* Title + Price + Likes */}
+        <div className="nft__item_info" style={{ padding: "10px 5px 20px" }}>
+          <Link to={`/item-details/${item.nftId}`}>
+            <h4
+              style={{
+                margin: "0 0 10px",
+                fontWeight: "600",
+              }}
+            >
+              {item.title}
+            </h4>
+          </Link>
+
+          <div
+            className="nft__item_price"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontWeight: "600",
+              marginBottom: "6px",
+            }}
+          >
+            <span>{item.price} ETH</span>
+
+            <div className="nft__item_like">
+              <i className="fa fa-heart"></i>
+              <span style={{ marginLeft: "5px" }}>{item.likes}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // -----------------------------
+  // JSX
+  // -----------------------------
   return (
     <section id="section-explore">
       <div className="container">
         <div className="row">
-
           {/* Filter Dropdown */}
           <div className="col-md-12 mb-4">
             <select
@@ -74,84 +218,23 @@ const ExploreItems = () => {
             </select>
           </div>
 
-          {/* Items */}
-{/* Items */}
-<div className="col-md-12">
-  <div className="row">
-    {loading
-      ? skeletons
-      : items.slice(0, visible).map((item) => (
-          <div
-            key={item.id}
-            className="d-item col-lg-3 col-md-6 col-sm-6 col-xs-12"
-            style={{ display: "block" }}
-          >
-            <div className="nft__item">
-
-              {/* Author */}
-              <div className="author_list_pp">
-                <Link to={`/author/${item.authorId}`}>
-                  <img className="lazy" src={item.authorImage} alt="" />
-                  <i className="fa fa-check"></i>
-                </Link>
-              </div>
-
-              {/* Countdown */}
-              <Countdown expiryDate={item.expiryDate} />
-
-              {/* Item Image */}
-              <div className="nft__item_wrap">
-                <div className="nft__item_extra">
-                  <div className="nft__item_buttons">
-                    <button>Buy Now</button>
-                    <div className="nft__item_share">
-                      <h4>Share</h4>
-                      <a href="#"><i className="fa fa-facebook fa-lg"></i></a>
-                      <a href="#"><i className="fa fa-twitter fa-lg"></i></a>
-                      <a href="#"><i className="fa fa-envelope fa-lg"></i></a>
-                    </div>
-                  </div>
-                </div>
-
-                <Link to={`/item-details/${item.id}`}>
-                  <img
-                    src={item.nftImage}
-                    className="lazy nft__item_preview"
-                    alt=""
-                  />
-                </Link>
-              </div>
-
-              {/* Info */}
-              <div className="nft__item_info">
-                <Link to={`/item-details/${item.id}`}>
-                  <h4>{item.title}</h4>
-                </Link>
-
-                <div className="nft__item_price">{item.price} ETH</div>
-
-                <div className="nft__item_like">
-                  <i className="fa fa-heart"></i>
-                  <span>{item.likes}</span>
-                </div>
-              </div>
-
+          {/* Items Grid */}
+          <div className="col-md-12">
+            <div className="row">
+              {loading
+                ? skeletons
+                : items.slice(0, visible).map((item) => renderCard(item))}
             </div>
           </div>
-        ))}
-  </div>
-</div>
-
 
           {/* Load More Button */}
-          {visible < items.length && (
+          {!loading && visible < items.length && (
             <div className="col-md-12 text-center mt-4">
               <button className="btn-main lead" onClick={loadMore}>
                 Load more
               </button>
             </div>
           )}
-
         </div>
       </div>
     </section>
