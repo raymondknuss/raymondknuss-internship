@@ -13,10 +13,16 @@ import { useEffect } from "react";
 function App() {
   useEffect(() => {
     AOS.init({
-      duration: 800,
-      once: true,
+      offset: 0, 
+      duration: 600, 
+      easing: "ease-out",
+      once: true, 
     });
   }, []);
+
+  useEffect(() => {
+    AOS.refresh();
+  });
 
   return (
     <Router>
