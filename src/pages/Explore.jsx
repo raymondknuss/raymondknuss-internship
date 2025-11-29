@@ -12,7 +12,6 @@ const Explore = () => {
       <div id="content" className="no-bottom no-top">
         <div id="top"></div>
 
-        {/* SUBHEADER */}
         <section
           id="subheader"
           className="text-light"
@@ -32,9 +31,10 @@ const Explore = () => {
           </div>
         </section>
 
-        {/* EXPLORE ITEMS */}
         <section aria-label="section">
-          <ExploreItems />
+          <div data-aos="fade-in">
+            <ExploreItems />
+          </div>
         </section>
       </div>
     </div>
