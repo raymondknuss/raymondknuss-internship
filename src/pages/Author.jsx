@@ -48,7 +48,7 @@ const Author = () => {
           style={{
             width: "100%",
             height: "300px",
-            backgroundColor: "#eee"
+            backgroundColor: "#eee",
           }}
         ></div>
 
@@ -71,7 +71,7 @@ const Author = () => {
                       style={{
                         width: "50px",
                         height: "50px",
-                        borderRadius: "50%"
+                        borderRadius: "50%",
                       }}
                     ></div>
                   </div>
@@ -82,7 +82,7 @@ const Author = () => {
                       style={{
                         width: "100%",
                         height: "200px",
-                        borderRadius: "10px"
+                        borderRadius: "10px",
                       }}
                     ></div>
                   </div>
@@ -92,7 +92,7 @@ const Author = () => {
                       className="skeleton"
                       style={{
                         width: "70%",
-                        height: "20px"
+                        height: "20px",
                       }}
                     ></div>
                     <div
@@ -100,7 +100,7 @@ const Author = () => {
                       style={{
                         width: "40%",
                         height: "20px",
-                        marginTop: "10px"
+                        marginTop: "10px",
                       }}
                     ></div>
                   </div>
@@ -131,7 +131,7 @@ const Author = () => {
           height: "300px",
           backgroundImage: `url(${bannerImage})`,
           backgroundSize: "cover",
-          backgroundPosition: "center"
+          backgroundPosition: "center",
         }}
       ></div>
 
@@ -206,7 +206,7 @@ const Author = () => {
                       </div>
 
                       <div className="nft__item_wrap">
-                        <Link to={`/item-details/${nft.id}`}>
+                        <Link to={`/item-details?nftId=${nft.nftId}`}>
                           <img
                             src={nft.nftImage}
                             className="lazy nft__item_preview"
@@ -216,7 +216,7 @@ const Author = () => {
                       </div>
 
                       <div className="nft__item_info">
-                        <Link to={`/item-details/${nft.id}`}>
+                        <Link to={`/item-details?nftId=${nft.nftId}`}>
                           <h4>{nft.title}</h4>
                         </Link>
 

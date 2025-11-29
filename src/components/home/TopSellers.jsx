@@ -24,7 +24,6 @@ const TopSellers = () => {
     fetchTopSellers();
   }, []);
 
-  // Skeleton placeholders (12 total)
   const skeletons = new Array(12).fill(0).map((_, index) => (
     <li key={index}>
       <div className="author_list_pp">
@@ -45,7 +44,6 @@ const TopSellers = () => {
       <div className="container">
         <div className="row">
 
-          {/* Header */}
           <div className="col-lg-12">
             <div className="text-center">
               <h2>Top Sellers</h2>
@@ -53,7 +51,6 @@ const TopSellers = () => {
             </div>
           </div>
 
-          {/* List */}
           <div className="col-md-12">
             <ol className="author_list">
               {loading

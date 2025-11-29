@@ -1,5 +1,3 @@
-// src/components/explore/ExploreItems.jsx
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Countdown from "../common/Countdown";
@@ -10,9 +8,6 @@ const ExploreItems = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
 
-  // -----------------------------
-  // Fetch data (with optional filter)
-  // -----------------------------
   const fetchData = async (filterValue = "") => {
     try {
       setLoading(true);
@@ -26,7 +21,7 @@ const ExploreItems = () => {
       const data = await res.json();
 
       setItems(data);
-      setVisible(8); // reset to first 8 whenever filter changes
+      setVisible(8);
     } catch (err) {
       console.error("Error fetching Explore items:", err);
     } finally {
@@ -38,9 +33,6 @@ const ExploreItems = () => {
     fetchData();
   }, []);
 
-  // -----------------------------
-  // Handlers
-  // -----------------------------
   const handleFilter = (e) => {
     const value = e.target.value;
     setFilter(value);
@@ -51,9 +43,6 @@ const ExploreItems = () => {
     setVisible((prev) => prev + 4);
   };
 
-  // -----------------------------
-  // Skeletons (same visual style as NewItems)
-  // -----------------------------
   const skeletons = new Array(8).fill(0).map((_, index) => (
     <div
       className="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4"
@@ -77,9 +66,6 @@ const ExploreItems = () => {
     </div>
   ));
 
-  // -----------------------------
-  // Card renderer (MATCHES NewItems card layout)
-  // -----------------------------
   const renderCard = (item) => (
     <div
       className="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-4"
@@ -93,7 +79,6 @@ const ExploreItems = () => {
           overflow: "hidden",
         }}
       >
-        {/* Author Avatar */}
         <div
           className="author_list_pp"
           style={{
@@ -119,7 +104,6 @@ const ExploreItems = () => {
           </Link>
         </div>
 
-        {/* NFT Image + Countdown Bubble (EXACT same bubble as NewItems) */}
         <div
           className="nft__item_wrap"
           style={{
@@ -128,7 +112,7 @@ const ExploreItems = () => {
             marginBottom: "15px",
           }}
         >
-          <Link to={`/item-details/${item.nftId}`}>
+          <Link to={`/item-details?nftId=${item.nftId}`}>
             <img
               src={item.nftImage}
               className="lazy nft__item_preview"
@@ -162,9 +146,8 @@ const ExploreItems = () => {
           )}
         </div>
 
-        {/* Title + Price + Likes */}
         <div className="nft__item_info" style={{ padding: "10px 5px 20px" }}>
-          <Link to={`/item-details/${item.nftId}`}>
+          <Link to={`/item-details?nftId=${item.nftId}`}>
             <h4
               style={{
                 margin: "0 0 10px",
@@ -197,14 +180,10 @@ const ExploreItems = () => {
     </div>
   );
 
-  // -----------------------------
-  // JSX
-  // -----------------------------
   return (
     <section id="section-explore">
       <div className="container">
         <div className="row">
-          {/* Filter Dropdown */}
           <div className="col-md-12 mb-4">
             <select
               id="filter-items"
@@ -218,7 +197,6 @@ const ExploreItems = () => {
             </select>
           </div>
 
-          {/* Items Grid */}
           <div className="col-md-12">
             <div className="row">
               {loading
@@ -227,7 +205,6 @@ const ExploreItems = () => {
             </div>
           </div>
 
-          {/* Load More Button */}
           {!loading && visible < items.length && (
             <div className="col-md-12 text-center mt-4">
               <button className="btn-main lead" onClick={loadMore}>

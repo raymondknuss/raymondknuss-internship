@@ -37,7 +37,6 @@ const NewItems = () => {
         overflow: "hidden",
       }}
     >
-      {/* Author Avatar */}
       <div
         className="author_list_pp"
         style={{
@@ -63,7 +62,6 @@ const NewItems = () => {
         </Link>
       </div>
 
-      {/* NFT Image + Countdown Bubble */}
       <div
         className="nft__item_wrap"
         style={{
@@ -72,7 +70,7 @@ const NewItems = () => {
           marginBottom: "15px",
         }}
       >
-        <Link to={`/item-details/${item.nftId}`}>
+        <Link to={`/item-details?nftId=${item.nftId}`}>
           <img
             src={item.nftImage}
             className="lazy nft__item_preview"
@@ -85,7 +83,6 @@ const NewItems = () => {
           />
         </Link>
 
-        {/* Countdown Build */}
         {item.expiryDate && (
           <div
             style={{
@@ -107,9 +104,8 @@ const NewItems = () => {
         )}
       </div>
 
-      {/* Title + Price + Likes */}
       <div className="nft__item_info" style={{ padding: "10px 5px 20px" }}>
-        <Link to={`/item-details/${item.nftId}`}>
+        <Link to={`/item-details?nftId=${item.nftId}`}>
           <h4
             style={{
               margin: "0 0 10px",
@@ -163,7 +159,7 @@ const NewItems = () => {
     <section id="section-items" className="no-bottom">
       <div className="container">
         <div className="row">
-          {/* Section Title */}
+
           <div className="col-lg-12">
             <div className="text-center">
               <h2>New Items</h2>
@@ -171,7 +167,6 @@ const NewItems = () => {
             </div>
           </div>
 
-          {/* Content */}
           <div className="col-12 p-0" style={{ position: "relative" }}>
             {loading ? (
               <div className="row">
@@ -248,6 +243,7 @@ const NewItems = () => {
               />
             )}
           </div>
+
         </div>
       </div>
     </section>
