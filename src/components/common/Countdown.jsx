@@ -22,9 +22,9 @@ const Countdown = ({ expiryDate }) => {
   const seconds = totalSeconds % 60;
 
   return (
-    <div className="de_countdown">
+    <>
       {hours}h {minutes}m {seconds}s
-    </div>
+    </>
   );
 };
 

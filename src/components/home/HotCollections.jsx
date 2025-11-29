@@ -2,135 +2,156 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-
-import "swiper/css";
-import "swiper/css/navigation";
-
-import authors from "../../data/authors.json";
+import AliceCarousel from "react-alice-carousel";
+import "react-alice-carousel/lib/alice-carousel.css";
 
 const HotCollections = () => {
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadCollections = async () => {
+    const fetchData = async () => {
       try {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/hotCollections"
         );
-
-        const normalized = data.map((item) => ({
-          ...item,
-
-          nftId: item.nftId ?? item.id,
-
-          ownerId: item.authorId ?? item.ownerId ?? null,
-          creatorId: item.creatorId ?? null,
-
-          code: item.code ? `ERC-${item.code}` : null
-        }));
-
-        setCollections(normalized);
-      } catch (err) {
-        console.error("Error loading HotCollections:", err);
+        setCollections(data);
+      } catch (error) {
+        console.error("Error fetching HotCollections:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCollections();
+    fetchData();
   }, []);
 
+  const items = collections.map((item) => (
+    <div className="nft_coll" key={item.id}>
+      <div className="nft_wrap">
+        <Link to={`/item-details?nftId=${item.nftId}`}>
+          <img src={item.nftImage} className="lazy img-fluid" alt="" />
+        </Link>
+      </div>
+
+      <div className="nft_coll_pp">
+        <Link to={`/author/${item.authorId}`}>
+          <img className="lazy pp-coll" src={item.authorImage} alt="" />
+        </Link>
+        <i className="fa fa-check"></i>
+      </div>
+
+      <div className="nft_coll_info">
+        <h4>{item.title}</h4>
+        <span>ERC-{item.code}</span>
+      </div>
+    </div>
+  ));
+
+  const skeletons = new Array(4).fill(0).map((_, index) => (
+    <div className="nft_coll" key={index}>
+      <div className="nft_wrap skeleton-box"></div>
+
+      <div className="nft_coll_pp">
+        <div className="lazy pp-coll skeleton-box" />
+        <i className="fa fa-check"></i>
+      </div>
+
+      <div className="nft_coll_info">
+        <h4 className="skeleton-box skeleton-text"></h4>
+        <span className="skeleton-box skeleton-text small"></span>
+      </div>
+    </div>
+  ));
+
   return (
-    <section className="no-bottom" id="section-collections">
+    <section id="section-collections" className="no-bottom">
       <div className="container">
         <div className="row">
 
-          {/* TITLE */}
-          <div className="col-lg-12 text-center mb-3">
-            <h2>Hot Collections</h2>
-            <div className="small-border bg-color-2"></div>
+          <div className="col-lg-12">
+            <div className="text-center">
+              <h2>Hot Collections</h2>
+              <div className="small-border bg-color-2"></div>
+            </div>
           </div>
 
           {loading ? (
-            <div className="col-12"><p>Loading...</p></div>
-          ) : (
             <div className="col-12">
-
-              <Swiper
-                modules={[Navigation]}
-                navigation
-                loop={true}
-                speed={600}
-                spaceBetween={20}
-                breakpoints={{
-                  0: { slidesPerView: 1 },
-                  568: { slidesPerView: 2 },
-                  1024: { slidesPerView: 4 },
+              <div className="row">
+                {skeletons.map((skel, index) => (
+                  <div
+                    key={index}
+                    className="col-lg-3 col-md-6 col-sm-6 col-xs-12"
+                  >
+                    {skel}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="col-12 p-0" style={{ position: "relative" }}>
+              <AliceCarousel
+                mouseTracking
+                infinite
+                disableDotsControls
+                disableSlideInfo
+                slideBy={1}
+                responsive={{
+                  0: { items: 1 },
+                  568: { items: 2 },
+                  1024: { items: 4 },
                 }}
-              >
-                {collections.map((item) => {
-                  const owner = authors.find(
-                    (auth) => auth.authorId === item.ownerId
-                  );
-
-                  return (
-                    <SwiperSlide key={item.nftId}>
-                      <div
-                        className="rounded bg-white shadow-sm p-3 text-center"
-                        style={{ cursor: "pointer" }}
-                      >
-                        {/* NFT IMAGE */}
-                        <Link to={`/item-details/${item.nftId}`}>
-                          <img
-                            src={item.nftImage}
-                            alt={item.title}
-                            className="img-fluid rounded mb-3"
-                            style={{ width: "100%" }}
-                          />
-                        </Link>
-
-                        {/* TITLE */}
-                        <Link
-                          to={`/item-details/${item.nftId}`}
-                          className="text-decoration-none"
-                        >
-                          <h5 className="fw-bold mb-1" style={{ color: "#000" }}>
-                            {item.title}
-                          </h5>
-                        </Link>
-
-                        {/* ERC */}
-                        <div
-                          className="text-muted mb-3"
-                          style={{ fontSize: "0.9rem" }}
-                        >
-                          {item.code}
-                        </div>
-
-                        {/* OWNER BADGE */}
-                        <div className="d-flex justify-content-center">
-                          {owner && (
-                            <Link to={`/author/${owner.authorId}`}>
-                              <img
-                                src={owner.authorImage}
-                                alt={owner.authorName}
-                                width="50"
-                                height="50"
-                                className="rounded-circle shadow"
-                                style={{ border: "2px solid white" }}
-                              />
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
-
+                renderPrevButton={() => (
+                  <button
+                    style={{
+                      position: "absolute",
+                      left: "-25px",
+                      top: "40%",
+                      transform: "translateY(-50%)",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "#fff",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+                      cursor: "pointer",
+                      fontSize: "22px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ‹
+                  </button>
+                )}
+                renderNextButton={() => (
+                  <button
+                    style={{
+                      position: "absolute",
+                      right: "-25px",
+                      top: "40%",
+                      transform: "translateY(-50%)",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "#fff",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+                      cursor: "pointer",
+                      fontSize: "22px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ›
+                  </button>
+                )}
+                items={items}
+              />
             </div>
           )}
 

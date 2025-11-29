@@ -1,158 +1,296 @@
-import React from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import ethIcon from "../images/ethereum.svg";
 
-import itemDetailsData from "../data/itemDetails.json";
-import authors from "../data/authors.json";
+const ITEM_DETAILS_ENDPOINT =
+  "https://us-central1-nft-cloud-functions.cloudfunctions.net/itemDetails";
+
+const Skeleton = () => {
+  return (
+    <section aria-label="section" className="mt90 sm-mt-0">
+      <div className="container">
+        <div className="row">
+          <div className="col-md-6 text-center">
+            <div
+              className="bg-light rounded mb-sm-30"
+              style={{ width: "100%", height: "500px", opacity: 0.6 }}
+            />
+          </div>
+
+          <div className="col-md-6">
+            <div className="item_info">
+              <div
+                className="bg-light rounded mb-3"
+                style={{ width: "60%", height: "32px", opacity: 0.6 }}
+              />
+              <div className="d-flex mb-4" style={{ gap: "10px" }}>
+                <div
+                  className="bg-light rounded-pill"
+                  style={{ width: "90px", height: "32px", opacity: 0.6 }}
+                />
+                <div
+                  className="bg-light rounded-pill"
+                  style={{ width: "90px", height: "32px", opacity: 0.6 }}
+                />
+              </div>
+
+              <div
+                className="bg-light rounded mb-2"
+                style={{ width: "100%", height: "14px", opacity: 0.6 }}
+              />
+              <div
+                className="bg-light rounded mb-2"
+                style={{ width: "90%", height: "14px", opacity: 0.6 }}
+              />
+              <div
+                className="bg-light rounded mb-4"
+                style={{ width: "80%", height: "14px", opacity: 0.6 }}
+              />
+
+              <div className="d-flex flex-row mb-4">
+                <div className="mr40">
+                  <div
+                    className="bg-light rounded mb-2"
+                    style={{ width: "70px", height: "16px", opacity: 0.6 }}
+                  />
+                  <div className="item_author d-flex align-items-center">
+                    <div
+                      className="bg-light rounded-circle"
+                      style={{ width: "48px", height: "48px", opacity: 0.6 }}
+                    />
+                    <div
+                      className="bg-light rounded ms-3"
+                      style={{ width: "120px", height: "18px", opacity: 0.6 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="spacer-40" />
+
+              <div
+                className="bg-light rounded mb-2"
+                style={{ width: "70px", height: "16px", opacity: 0.6 }}
+              />
+              <div className="item_author d-flex align-items-center mb-4">
+                <div
+                  className="bg-light rounded-circle"
+                  style={{ width: "48px", height: "48px", opacity: 0.6 }}
+                />
+                <div
+                  className="bg-light rounded ms-3"
+                  style={{ width: "120px", height: "18px", opacity: 0.6 }}
+                />
+              </div>
+
+              <div className="spacer-40" />
+
+              <div
+                className="bg-light rounded mb-2"
+                style={{ width: "60px", height: "16px", opacity: 0.6 }}
+              />
+              <div
+                className="bg-light rounded"
+                style={{ width: "150px", height: "40px", opacity: 0.6 }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const ItemDetails = () => {
-  const { nftId } = useParams();
+  const [searchParams] = useSearchParams();
+  const nftId = searchParams.get("nftId");
 
-  const item = itemDetailsData.find(
-    (entry) => String(entry.nftId) === String(nftId)
-  );
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(Boolean(nftId));
+  const [error, setError] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!item) {
+  useEffect(() => {
+    if (!nftId) {
+      setLoading(false);
+      setError("Missing nftId in URL.");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        setLoading(true);
+        setError(null);
+        setNotFound(false);
+
+        const response = await fetch(
+          `${ITEM_DETAILS_ENDPOINT}?nftId=${encodeURIComponent(nftId)}`
+        );
+
+        if (!response.ok) {
+          if (!cancelled) setNotFound(true);
+          return;
+        }
+
+        const text = await response.text();
+
+        if (!text || text.trim() === "") {
+          if (!cancelled) setNotFound(true);
+          return;
+        }
+
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          if (!cancelled) setNotFound(true);
+          return;
+        }
+
+        if (!parsed || Object.keys(parsed).length === 0) {
+          if (!cancelled) setNotFound(true);
+          return;
+        }
+
+        if (!cancelled) setItem(parsed);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || "Error fetching item details.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nftId]);
+
+  if (loading) return <Skeleton />;
+
+  if (error) {
     return (
       <section className="container py-5">
-        <h2>Item not found</h2>
-        <p>The item you're looking for doesn't exist.</p>
+        <h2>Item not available</h2>
+        <p>{error}</p>
       </section>
     );
   }
 
-  const owner = authors.find((auth) => auth.authorId === item.ownerId);
-  const creator = authors.find((auth) => auth.authorId === item.creatorId);
+  if (notFound || !item) {
+    return (
+      <section className="container py-5">
+        <h2>Item not found</h2>
+        <p>We couldn't load this NFT.</p>
+      </section>
+    );
+  }
+
+  const {
+    title,
+    tag,
+    description,
+    nftImg,
+    nftImage,
+    image,
+    ownerName,
+    ownerId,
+    ownerImage,
+    creatorName,
+    creatorId,
+    creatorImage,
+    price,
+    likes,
+    views,
+  } = item;
+
+  const displayImage = nftImg || nftImage || image;
 
   return (
-    <section className="container py-5">
-      <div className="row g-5 align-items-start">
-
-        {/* IMAGE */}
-        <div className="col-lg-7">
-          <img
-            src={item.nftImage}
-            alt={item.title}
-            className="img-fluid rounded shadow"
-            style={{ width: "100%", height: "auto" }}
-          />
-        </div>
-
-        {/* DETAILS */}
-        <div className="col-lg-5">
-
-          {/* TITLE */}
-          <h2 className="fw-bold mb-3">{item.title}</h2>
-
-          {/* ERC CODE */}
-          {item.code && (
-            <div className="text-muted mb-3" style={{ fontSize: "0.9rem" }}>
-              {item.code}
-            </div>
-          )}
-
-          {/* VIEWS + LIKES */}
-          <div className="d-flex align-items-center mb-4" style={{ gap: "15px" }}>
-            <div className="px-3 py-1 bg-light rounded-pill d-flex align-items-center" style={{ gap: "6px", fontWeight: 500 }}>
-              👁‍🗨 {item.views}
-            </div>
-            <div className="px-3 py-1 bg-light rounded-pill d-flex align-items-center" style={{ gap: "6px", fontWeight: 500 }}>
-              ❤️ {item.likes}
-            </div>
+    <section aria-label="section" className="mt90 sm-mt-0">
+      <div className="container">
+        <div className="row">
+          <div className="col-md-6 text-center">
+            <img
+              src={displayImage}
+              alt={title}
+              className="img-fluid img-rounded mb-sm-30 nft-image"
+            />
           </div>
 
-          {/* DESCRIPTION */}
-          <p className="text-muted mb-4" style={{ lineHeight: "1.7" }}>
-            {item.description}
-          </p>
+          <div className="col-md-6">
+            <div className="item_info">
+              <h2>
+                {title} {tag && `#${tag}`}
+              </h2>
 
-          {/* OWNER */}
-          <div className="mb-4">
-            <h6 className="fw-bold mb-2">Owner</h6>
-
-            {owner ? (
-              <Link
-                to={`/author/${owner.authorId}`}
-                className="d-flex align-items-center text-decoration-none"
-              >
-                <img
-                  src={owner.authorImage}
-                  alt={owner.authorName}
-                  className="rounded-circle"
-                  width="48"
-                  height="48"
-                />
-                <div className="ms-3">
-                  <span className="fw-bold text-dark">{owner.authorName}</span>
+              <div className="item_info_counts">
+                <div className="item_info_views">
+                  <i className="fa fa-eye"></i>
+                  {views}
                 </div>
-              </Link>
-            ) : item.ownerName ? (
-              <div className="d-flex align-items-center">
-                <img
-                  src={item.ownerImage}
-                  alt={item.ownerName}
-                  className="rounded-circle"
-                  width="48"
-                  height="48"
-                />
-                <div className="ms-3">
-                  <span className="fw-bold">{item.ownerName}</span>
+                <div className="item_info_like">
+                  <i className="fa fa-heart"></i>
+                  {likes}
                 </div>
               </div>
-            ) : (
-              <div className="text-muted">Unknown Owner</div>
-            )}
-          </div>
 
-          {/* CREATOR */}
-          <div className="mb-4">
-            <h6 className="fw-bold mb-2">Creator</h6>
+              <p>{description}</p>
 
-            {creator ? (
-              <Link
-                to={`/author/${creator.authorId}`}
-                className="d-flex align-items-center text-decoration-none"
-              >
-                <img
-                  src={creator.authorImage}
-                  alt={creator.authorName}
-                  className="rounded-circle"
-                  width="48"
-                  height="48"
-                />
-                <div className="ms-3">
-                  <span className="fw-bold text-dark">{creator.authorName}</span>
-                </div>
-              </Link>
-            ) : item.creatorName ? (
-              <div className="d-flex align-items-center">
-                <img
-                  src={item.creatorImage}
-                  alt={item.creatorName}
-                  className="rounded-circle"
-                  width="48"
-                  height="48"
-                />
-                <div className="ms-3">
-                  <span className="fw-bold">{item.creatorName}</span>
+              <div className="d-flex flex-row">
+                <div className="mr40">
+                  <h6>Owner</h6>
+                  <div className="item_author">
+                    <div className="author_list_pp">
+                      <Link to={`/author/${ownerId}`}>
+                        <img
+                          className="lazy"
+                          src={ownerImage}
+                          alt={ownerName}
+                        />
+                        <i className="fa fa-check"></i>
+                      </Link>
+                    </div>
+                    <div className="author_list_info">
+                      <Link to={`/author/${ownerId}`}>{ownerName}</Link>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-muted">Unknown Creator</div>
-            )}
-          </div>
 
-          {/* PRICE */}
-          <div className="mt-4">
-            <h6 className="fw-bold mb-2">Price</h6>
-            <div
-              className="d-flex align-items-center"
-              style={{ fontSize: "1.8rem", fontWeight: 700 }}
-            >
-              <span style={{ marginRight: "8px" }}>💠</span>
-              {item.price} ETH
+              <div className="spacer-40"></div>
+
+              <h6>Creator</h6>
+              <div className="item_author">
+                <div className="author_list_pp">
+                  <Link to={`/author/${creatorId}`}>
+                    <img
+                      className="lazy"
+                      src={creatorImage}
+                      alt={creatorName}
+                    />
+                    <i className="fa fa-check"></i>
+                  </Link>
+                </div>
+                <div className="author_list_info">
+                  <Link to={`/author/${creatorId}`}>{creatorName}</Link>
+                </div>
+              </div>
+
+              <div className="spacer-40"></div>
+
+              <h6>Price</h6>
+              <div className="nft-item-price">
+                <img src={ethIcon} alt="ETH" />
+                <span>{price}</span>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

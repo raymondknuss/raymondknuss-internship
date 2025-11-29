@@ -7,39 +7,34 @@ const TopSellers = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSellers = async () => {
+    const fetchTopSellers = async () => {
       try {
         const { data } = await axios.get(
           "https://us-central1-nft-cloud-functions.cloudfunctions.net/topSellers"
         );
 
-        const normalized = data.map((seller) => ({
-          ...seller,
-          authorId: seller.authorId ?? seller.id ?? null,
-          authorName: seller.authorName ?? "Unknown Author",
-          authorImage: seller.authorImage ?? "/img/placeholder.png",
-          price: seller.price ?? seller.totalSales ?? 0
-        }));
-
-        setSellers(normalized);
+        setSellers(data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching Top Sellers:", error);
-      } finally {
         setLoading(false);
       }
     };
 
-    fetchSellers();
+    fetchTopSellers();
   }, []);
 
   const skeletons = new Array(12).fill(0).map((_, index) => (
     <li key={index}>
       <div className="author_list_pp">
-        <div className="skeleton-box pp-author"></div>
+        <div className="lazy skeleton-box pp-author"></div>
       </div>
       <div className="author_list_info">
         <div className="skeleton-box skeleton-text" style={{ width: "80px" }} />
-        <div className="skeleton-box skeleton-text small" style={{ width: "50px" }} />
+        <div
+          className="skeleton-box skeleton-text small"
+          style={{ width: "50px" }}
+        />
       </div>
     </li>
   ));
@@ -60,12 +55,12 @@ const TopSellers = () => {
             <ol className="author_list">
               {loading
                 ? skeletons
-                : sellers.map((seller) => (
-                    <li key={seller.authorId}>
+                : sellers.map((seller, index) => (
+                    <li key={seller.id}>
                       <div className="author_list_pp">
                         <Link to={`/author/${seller.authorId}`}>
                           <img
-                            className="pp-author"
+                            className="lazy pp-author"
                             src={seller.authorImage}
                             alt={seller.authorName}
                           />
